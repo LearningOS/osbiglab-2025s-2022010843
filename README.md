@@ -12,22 +12,14 @@ Repository for OSBigLab-2025s (2022010843)
 
 # 代码仓库
 
-## Jailhouse
-
-https://github.com/TosMIC20/jailhouse
-
-## RVM
-
-https://github.com/TosMIC20/RVM1.5
-
-## Uintr-linux-kernel
-
-https://github.com/TosMIC20/uintr-linux-kernel
-
 ## Nimbos
 
-https://github.com/TosMIC20/nimbos
+https://github.com/cRTOS-Uintr/nimbos
 
 ## Nimbos-driver
 
-https://github.com/TosMIC20/nimbos-driver/
+https://github.com/cRTOS-Uintr/nimbos-driver/
+
+## SCF
+
+https://github.com/cRTOS-Uintr/scf
