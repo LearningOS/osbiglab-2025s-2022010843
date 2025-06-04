@@ -32,8 +32,35 @@
     - shadow process 也 fork 出子进程，和 nimbos 侧的子进程同步
     - 分配新的 syscall queue 和 irq_num，供两个子进程通信
     - 在新的信道上，通过 syncmap 同步两个子进程的映射
-### 规划
-- 整理代码，让新功能作为一个模块引入 nimbos，提交 PR
-- 实现更多的 syscall：
-  - sys_clone：nimbos 的线程机制和 linux 不同，需要特殊处理
-  - sys_exit：在进程退出时，同步释放 shadow process （需要在 sys_clone 的基础上实现，因为 nimbos 的线程实现的特点）
+
+## 4.17 进展
+
+- 阅读了文献关于 Linux rexec 的实现。
+- 实现了 Nimbos Linux Loader，从 Linux 侧远程加载用户程序并且运行。
+
+## 4.24 进展
+
+- 实现了 `clone` 和 `exit`。
+- 整理了所有的代码，已提交 PR。
+- 阅读了 Nimbos 中中断的实现，以准备添加收发中
+
+## 5.8 进展
+
+- 与 uintr 部分合并
+- 尝试修改反向通知机制为 ipi
+
+## 5.15 进展
+
+- 反向通知机制的实现
+- 修复了合并后的一些 bug
+- 尝试支持 musl，以支持原生 linux 程序
+
+## 5.22 进展
+
+- 尝试了 musl 的支持，但是 debug 比较困难
+- 鉴于 nimbos 本身进程实现比较简陋，将 SCF 逻辑提取成 crate 以移植到更完善的 OS（Starry，Arceos）
+
+## 5.29 进展
+
+- 合并 uintr 通知机制
+- 将 SCF 模块提取成独立的 crate
