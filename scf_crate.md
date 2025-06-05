@@ -20,7 +20,9 @@ SCF 中会用到很多和操作系统其他部件有所耦合的功能：
 1. 多核：APIC 需要 percpu，如果后续需要多核，可能会产生依赖。
 2. 虚拟地址问题：需要合理安置 lapic 和 ioapic 的虚拟地址
 
-另外一个可能的方法是使用移植目标 OS 的中断支持，只需要注意将 APIC 的 IPI destination mode 设置为 Logical 即可，不过会增加耦合度。
+另外一个可能的方法是使用移植目标 RTOS 的中断支持，只需要注意将 APIC 的 IPI destination mode 设置为 Logical 即可，不过会增加耦合度。
+
+还可以通过回调来解决，将 `sendipi` 和 `register_handler` 回调放在 `scf_callbacks` 中。
 
 #### sync 相关
 
@@ -40,7 +42,7 @@ SCF 中会用到很多和操作系统其他部件有所耦合的功能：
     2. SCF 需要的 uintr 比较特殊，是 cross-os 的一个 uintr，与一般的 uintr 有所区别。
 2. 单独实现一个 uintr Crate，支持 uintr 功能：
     1. 解耦、复用性更高
-    2. 然而还是无法避免需要 patch 目标 OS
+    2. 然而还是无法避免需要 patch 目标 RTOS
 
 #### alloc
 
@@ -77,5 +79,11 @@ SCF 中会用到很多和操作系统其他部件有所耦合的功能：
             2. read 到这一片空间后，加载程序
             3. munmap 这一片空间
     3. 总结：如果加载到内核内存（更安全），则需要实现 kernel syncmap，让 Shadow process 可见 RTOS 的 kernel。
-
-
+4. dual fd 的实现
+    1. Nimbos 中没有文件系统，所以可以直接将文件操作直通给 Linux。
+    2. 如果移植的目标 RTOS 本身带有 fs，可以考虑实现文献中的 dual fd：
+        1. 设置一个分界线 `fd_limit`
+        2. 小于 limit 的 `fd` 视作 Linux 的，转发给 Linux 处理
+            - 整个系统能打开的 Linux 文件有上限
+        3. 大于 limit 的 `fd` 视作 RTOS 的，RTOS 本地处理，
+            - 需要稍稍修改 RTOS 的文件符分配，从 `fd_limit` 开始
