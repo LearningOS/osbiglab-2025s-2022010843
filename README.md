@@ -23,3 +23,9 @@ https://github.com/cRTOS-Uintr/nimbos-driver/
 ## SCF
 
 https://github.com/cRTOS-Uintr/scf
+
+# 文档
+
+[SCF 原理和实现](./scf_doc.md)
+
+[SCF Crate 文档](./scf_crate.md)
