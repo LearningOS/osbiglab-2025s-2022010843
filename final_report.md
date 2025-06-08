@@ -103,3 +103,51 @@ Starry 是组件化操作系统，所以也许可以将目前的工作提取出�
 目前已经将 SCF 的相关代码封装成了一个 [SCF Crate](https://github.com/cRTOS-Uintr/scf)。
 
 过程中遇到了若干关于设计、功能划分的问题，以及后续移植完成后可以继续优化的点，写在了 [SCF Crate Note](./scf_crate.md) 中。
+
+## 实机测试
+
+在 x14 物理机上用下列程序测试 `sys_write` 的延迟：
+
+```c
+for (int i = 0; i < TOTAL_SAMPLES; i++) {
+    err = clock_gettime(DEFAULT_CLOCK, &start);
+    for (int j = 0; j < CYCLES_PER_SAMPLE; j++) {
+        do_write();
+    }
+    err = clock_gettime(DEFAULT_CLOCK, &end);
+    long interval = tsdelta(&end, &start);
+    printf("Live: latency = %ld usec %d", interval / CYCLES_PER_SAMPLE, i);
+    printf("\n");
+    // printf("\033[A\033[2K");
+    total += interval;
+}
+avg = total / TOTAL_SAMPLES;
+printf("Avg time delay per syscall: %ld usec\n", avg / CYCLES_PER_SAMPLE);
+printf("Total time delay for %d syscalls: %ld usec\n", TOTAL_SAMPLES * CYCLES_PER_SAMPLE, total);
+```
+
+其中参数：
+- `TOTAL_SAMPLES=20`
+- `CYCLES_PER_SAMPLE=10000`
+
+
+得到的结果：
+
+1. 普通 IPI: ~1346 usec
+2. Uintr：~1346 usec
+
+结果相差无几，可能是因为 uintr 通知机制的优化相比系统调用延迟而言很小。
+
+
+
+在 Shadow Process 处理 syscall 的逻辑中，把实际的系统调用去掉（即收到请求就立即 push response）过后，进行测试：
+1. 普通 IPI：~1076 usec
+2. Uintr：~1076 usec
+
+结果还是相差无几，分析原因可能是内存操作（同步）导致的。
+
+目前还没有进一步测试将内存操作去掉过后的延时。将内存操作去掉过后，可能会显示出纳秒级别的区别。
+
+附：其中一次测试的输出：
+![result](./assets/test.png)
+
